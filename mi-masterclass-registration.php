@@ -91,7 +91,11 @@ add_action('wp_enqueue_scripts', 'mi_masterclass_enqueue_scripts');
 function mi_masterclass_enqueue_scripts() {
     wp_enqueue_style('mi-masterclass-style', MI_MASTERCLASS_PLUGIN_URL . 'assets/css/style.css', array(), MI_MASTERCLASS_VERSION);
     wp_enqueue_script('mi-masterclass-script', MI_MASTERCLASS_PLUGIN_URL . 'assets/js/script.js', array('jquery'), MI_MASTERCLASS_VERSION, true);
-    
+
+    if (!is_admin() && is_user_logged_in()) {
+        wp_enqueue_style('dashicons');
+    }
+
     wp_localize_script('mi-masterclass-script', 'mi_masterclass_ajax', array(
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('mi_masterclass_nonce')
