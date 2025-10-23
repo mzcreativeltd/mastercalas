@@ -1,0 +1,291 @@
+/* M&I Master Class Admin Styles */
+
+.mi-stats-container {
+    background: #fff;
+    padding: 20px;
+    margin: 20px 0;
+    border: 1px solid #ccd0d4;
+    box-shadow: 0 1px 1px rgba(0,0,0,.04);
+}
+
+.mi-stats-container h2 {
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    margin-bottom: 20px;
+}
+
+.mi-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.mi-stat-box {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 5px;
+    border: 1px solid #e2e4e7;
+    transition: all 0.3s ease;
+}
+
+.mi-stat-box:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.mi-stat-box h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #23282d;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.mi-stat-box p {
+    margin: 8px 0;
+    color: #50575e;
+    font-size: 14px;
+}
+
+.mi-stat-box p strong {
+    color: #23282d;
+    display: inline-block;
+    min-width: 140px;
+}
+
+.mi-progress-bar {
+    width: 100%;
+    height: 20px;
+    background: #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.mi-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #007cba, #00a0d2);
+    border-radius: 10px;
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+.mi-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Tabela rejestracji */
+.wp-list-table.mi-registrations {
+    margin-top: 20px;
+}
+
+.wp-list-table.mi-registrations th {
+    font-weight: 600;
+    background: #f1f3f5;
+}
+
+.wp-list-table.mi-registrations td {
+    vertical-align: middle;
+}
+
+.wp-list-table.mi-registrations .dashicons-yes {
+    color: #46b450;
+}
+
+.wp-list-table.mi-registrations .dashicons-no-alt {
+    color: #dc3232;
+}
+
+/* Przyciski */
+.button.mi-export-btn {
+    margin-bottom: 15px;
+}
+
+/* Ustawienia */
+.form-table textarea {
+    font-family: monospace;
+    line-height: 1.5;
+}
+
+.form-table code {
+    display: inline-block;
+    padding: 10px 15px;
+    background: #f4f4f4;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 14px;
+    user-select: all;
+    margin: 10px 0;
+}
+
+/* Komunikaty */
+.notice.mi-notice {
+    margin: 20px 0;
+    padding: 12px;
+}
+
+.notice.mi-notice p {
+    margin: 0.5em 0;
+    padding: 2px;
+}
+
+/* Responsywność */
+@media screen and (max-width: 782px) {
+    .mi-stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .wp-list-table {
+        font-size: 12px;
+    }
+    
+    .wp-list-table th,
+    .wp-list-table td {
+        padding: 8px 5px;
+    }
+}
+
+/* Animacje dla statystyk */
+.mi-stat-box {
+    animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Tooltip dla statystyk */
+.mi-stat-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: help;
+}
+
+.mi-stat-tooltip .dashicons {
+    color: #666;
+    font-size: 16px;
+}
+
+.mi-stat-tooltip:hover .dashicons {
+    color: #007cba;
+}
+
+.mi-stat-tooltip .mi-tooltip-content {
+    visibility: hidden;
+    width: 200px;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 8px 10px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%;
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    font-size: 12px;
+}
+
+.mi-stat-tooltip:hover .mi-tooltip-content {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Styl dla pustej tabeli */
+.wp-list-table tbody tr td[colspan] {
+    text-align: center;
+    padding: 20px;
+    color: #999;
+    font-style: italic;
+}
+
+/* Ikony statusu */
+.mi-status-icon {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.mi-status-icon.active {
+    background-color: #46b450;
+}
+
+.mi-status-icon.inactive {
+    background-color: #dc3232;
+}
+
+/* Filtr i wyszukiwanie */
+.mi-admin-filters {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #f1f3f5;
+    border-radius: 5px;
+}
+
+.mi-admin-filters select,
+.mi-admin-filters input[type="text"] {
+    padding: 5px 10px;
+    border: 1px solid #ccd0d4;
+    border-radius: 3px;
+}
+
+.mi-admin-filters button {
+    padding: 5px 15px;
+}
+
+/* Licznik rejestracji w czasie rzeczywistym */
+.mi-live-counter {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #007cba;
+    color: white;
+    padding: 15px 20px;
+    border-radius: 50px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    z-index: 9999;
+    font-weight: 600;
+    display: none;
+}
+
+.mi-live-counter.show {
+    display: block;
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
