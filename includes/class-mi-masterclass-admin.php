@@ -14,6 +14,7 @@ class MI_Masterclass_Admin {
     public function __construct() {
         add_action('admin_menu', array($this, 'add_admin_menu'));
         add_action('admin_init', array($this, 'register_settings'));
+        add_action('admin_bar_menu', array($this, 'add_admin_bar_item'), 100);
     }
     
     public function add_admin_menu() {
@@ -45,7 +46,27 @@ class MI_Masterclass_Admin {
             array($this, 'admin_page_settings')
         );
     }
-    
+
+    public function add_admin_bar_item($wp_admin_bar) {
+        if (!is_admin_bar_showing() || !current_user_can('manage_options')) {
+            return;
+        }
+
+        $args = array(
+            'id'    => 'mi-masterclass-admin-bar',
+            'title' => sprintf(
+                '<span class="ab-icon dashicons-groups"></span><span class="ab-label">%s</span>',
+                esc_html__('M&I Master Class', 'mi-masterclass')
+            ),
+            'href'  => admin_url('admin.php?page=mi-masterclass'),
+            'meta'  => array(
+                'title' => __('Przejdź do kokpitu M&I Master Class', 'mi-masterclass'),
+            ),
+        );
+
+        $wp_admin_bar->add_node($args);
+    }
+
     public function register_settings() {
         register_setting('mi_masterclass_settings', 'mi_masterclass_notification_emails');
         register_setting('mi_masterclass_settings', 'mi_masterclass_active_limit');
