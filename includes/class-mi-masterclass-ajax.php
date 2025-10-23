@@ -281,8 +281,8 @@ class MI_Masterclass_Ajax {
         }
     }
 
-    /**
-     * Mail potwierdzenia do uczestnika
+  /**
+     * Mail potwierdzenia do uczestnika — wersja HTML brandowana M&I
      */
     private function send_user_confirmation( $email, array $data ) {
         if ( empty( $email ) || ! is_email( $email ) ) {
@@ -294,23 +294,157 @@ class MI_Masterclass_Ajax {
 
         $subject = 'Potwierdzenie zgłoszenia – M&I Master Class';
 
-        $lines = [
-            'Dziękujemy za zgłoszenie na M&I Master Class!',
-            '',
-            'Podsumowanie:',
-            '– Imię i nazwisko: ' . $data['name'],
-            '– Salon: ' . $data['salon_name'],
-            '– Termin: ' . $data['event_date'] . ' ' . $data['event_time'],
-            '– Typ udziału: ' . $pt_label,
-            '– Partner: ' . $partner,
-            '',
-            'Wkrótce skontaktujemy się z dalszymi informacjami organizacyjnymi.',
-        ];
+        $html = $this->build_mi_brand_email_html( [
+            'logo_url'   => 'https://m-and-i.pl/wp-content/uploads/2025/04/mi-czarne-RGB-300-dpi.png',
+            'headline'   => 'Dziękujemy za zgłoszenie na M&I Master Class!',
+            'intro'      => 'Twoja rejestracja została przyjęta. Poniżej znajdziesz podsumowanie zgłoszenia:',
+            'rows'       => [
+                [ 'label' => 'Imię i nazwisko', 'value' => $data['name'] ?? '' ],
+                [ 'label' => 'Salon',            'value' => $data['salon_name'] ?? '' ],
+                [ 'label' => 'Termin',           'value' => trim( ($data['event_date'] ?? '') . ' ' . ($data['event_time'] ?? '') ) ],
+                [ 'label' => 'Typ udziału',      'value' => $pt_label ],
+                [ 'label' => 'Partner',          'value' => $partner ],
+            ],
+            'note'       => '',
+            'footer'     => 'M&I – Szkolenia i Master Class • m-and-i.pl',
+            'cta_text'   => 'Odwiedź m-and-i.pl',
+            'cta_href'   => home_url('/'),
+        ] );
 
-        $body    = implode( "\n", $lines );
-        $headers = [ 'Content-Type: text/plain; charset=UTF-8' ];
+        $headers = [ 'Content-Type: text/html; charset=UTF-8' ];
 
-        wp_mail( $email, $subject, $body, $headers );
+        // (opcjonalnie) ustaw „Reply-To” na e-mail kontaktowy firmy
+        $company_reply_to = get_option( 'admin_email' );
+        if ( is_email( $company_reply_to ) ) {
+            $headers[] = 'Reply-To: ' . $company_reply_to;
+        }
+
+        wp_mail( $email, $subject, $html, $headers );
+    }
+
+    /**
+     * Helper: buduje markowy HTML e-mail w stylu M&I (lekka karta + tabela szczegółów)
+     *
+     * @param array $args {
+     *   @type string   logo_url
+     *   @type string   headline
+     *   @type string   intro
+     *   @type array[]  rows      Każdy element: [ 'label' => '…', 'value' => '…' ]
+     *   @type string   note
+     *   @type string   footer
+     *   @type string   cta_text
+     *   @type string   cta_href
+     * }
+     * @return string
+     */
+    private function build_mi_brand_email_html( array $args ) {
+        // Tokeny kolorów / brand
+        $ink     = '#1b1c1e';
+        $muted   = '#5f6b7b';
+        $accent  = '#2e7d32'; // zielony akcent M&I
+        $bg      = '#f7f9fb';
+        $card    = '#ffffff';
+        $border  = '#e8ecf3';
+        $ring    = 'rgba(46,125,50,.12)';
+
+        $logo    = esc_url( $args['logo_url'] ?? '' );
+        $headline= esc_html( $args['headline'] ?? '' );
+        $intro   = esc_html( $args['intro'] ?? '' );
+        $note    = esc_html( $args['note'] ?? '' );
+        $footer  = esc_html( $args['footer'] ?? get_bloginfo('name') );
+        $cta_txt = esc_html( $args['cta_text'] ?? '' );
+        $cta_href= esc_url( $args['cta_href'] ?? '' );
+
+        // Wiersze tabeli szczegółów
+        $rows_html = '';
+        if ( ! empty( $args['rows'] ) && is_array( $args['rows'] ) ) {
+            foreach ( $args['rows'] as $row ) {
+                $label = isset($row['label']) ? esc_html( $row['label'] ) : '';
+                $value = isset($row['value']) ? esc_html( $row['value'] ) : '';
+                $rows_html .= '
+                    <tr>
+                        <td style="padding:10px 12px;border-bottom:1px solid '.$border.';font-weight:600;color:'.$ink.';white-space:nowrap;">'.$label.'</td>
+                        <td style="padding:10px 12px;border-bottom:1px solid '.$border.';color:'.$ink.';">'.$value.'</td>
+                    </tr>';
+            }
+        }
+
+        // Minimalny, kompatybilny HTML (inline CSS – pod klienty pocztowe)
+        $html = '
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>'. $headline .'</title>
+</head>
+<body style="margin:0;padding:0;background:'.$bg.';color:'.$ink.';font-family:Arial,Helvetica,sans-serif;line-height:1.55;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:'.$bg.';padding:24px 16px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" width="640" cellpadding="0" cellspacing="0" border="0" style="max-width:640px;width:100%;">
+          <!-- Logo -->
+          <tr>
+            <td align="center" style="padding:8px 0 16px 0;">
+              '. ( $logo ? '<img src="'.$logo.'" alt="M&I" width="180" style="max-width:180px;height:auto;display:block;">' : '' ) .'
+            </td>
+          </tr>
+
+          <!-- Karta -->
+          <tr>
+            <td style="background:'.$card.';border:1px solid '.$border.';border-radius:14px;box-shadow:0 6px 24px '.$ring.';padding:24px;">
+              
+              <!-- Nagłówek -->
+              <h1 style="margin:0 0 8px 0;font-size:22px;line-height:1.3;color:'.$ink.';font-weight:700;">
+                '.$headline.'
+              </h1>
+              <p style="margin:0 0 18px 0;color:'.$muted.';font-size:15px;">'.$intro.'</p>
+
+              <!-- Divider -->
+              <hr style="border:none;border-top:1px solid '.$border.';margin:12px 0 16px 0;">
+
+              <!-- Tabela szczegółów -->
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                <tbody>
+                  '.$rows_html.'
+                </tbody>
+              </table>
+
+              <!-- Info -->
+              <p style="margin:18px 0 0 0;color:'.$ink.';font-size:15px;">'.$note.'</p>
+
+              <!-- CTA -->
+              '. ( $cta_txt && $cta_href ? '
+              <div style="margin-top:18px;">
+                <a href="'.$cta_href.'" target="_blank" 
+                   style="display:inline-block;text-decoration:none;background:'.$accent.';color:#fff;padding:12px 18px;border-radius:10px;font-weight:700;">
+                   '.$cta_txt.'
+                </a>
+              </div>' : '' ) .'
+
+            </td>
+          </tr>
+
+          <!-- Stopka -->
+          <tr>
+            <td align="center" style="padding:14px 8px 0 8px;color:'.$muted.';font-size:12px;">
+              '.$footer.'<br>
+              Ten e-mail został wygenerowany automatycznie – prosimy, nie odpowiadać bezpośrednio.
+            </td>
+          </tr>
+
+          <tr>
+            <td align="center" style="height:18px;"></td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>';
+
+        return $html;
     }
 
     /**
