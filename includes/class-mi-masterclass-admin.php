@@ -62,8 +62,38 @@ class MI_Masterclass_Admin {
             return;
         }
         
+        // Obsługa usuwania rejestracji
+        if (isset($_POST['mi_delete_registration'], $_POST['registration_id'])) {
+            if (!current_user_can('manage_options')) {
+                wp_die(__('Nie masz uprawnień do wykonania tej operacji.', 'mi-masterclass'));
+            }
+
+            $registration_id = intval($_POST['registration_id']);
+
+            check_admin_referer('mi_delete_registration_' . $registration_id);
+
+            $deleted = $wpdb->delete(
+                $table_name,
+                array('id' => $registration_id),
+                array('%d')
+            );
+
+            $redirect_url = add_query_arg(
+                array(
+                    'page' => 'mi-masterclass',
+                    'mi_delete' => $deleted ? 'success' : 'error'
+                ),
+                admin_url('admin.php')
+            );
+
+            wp_safe_redirect($redirect_url);
+            exit;
+        }
+
         // Pobieranie rejestracji
         $registrations = $wpdb->get_results("SELECT * FROM $table_name ORDER BY registration_date DESC");
+
+        $delete_status = isset($_GET['mi_delete']) ? sanitize_key($_GET['mi_delete']) : '';
         
         // Statystyki
         $stats = $this->get_statistics();
@@ -96,6 +126,18 @@ class MI_Masterclass_Admin {
                 </a>
             </p>
             
+            <?php if ($delete_status): ?>
+                <?php if ($delete_status === 'success'): ?>
+                    <div class="notice notice-success is-dismissible">
+                        <p>Rejestracja została pomyślnie usunięta.</p>
+                    </div>
+                <?php elseif ($delete_status === 'error'): ?>
+                    <div class="notice notice-error is-dismissible">
+                        <p>Wystąpił błąd podczas usuwania rejestracji. Spróbuj ponownie.</p>
+                    </div>
+                <?php endif; ?>
+            <?php endif; ?>
+
             <table class="wp-list-table widefat fixed striped">
                 <thead>
                     <tr>
@@ -109,6 +151,7 @@ class MI_Masterclass_Admin {
                         <th>Rodzaj udziału</th>
                         <th>Partner M&I</th>
                         <th>Data rejestracji</th>
+                        <th>Akcje</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -125,11 +168,19 @@ class MI_Masterclass_Admin {
                             <td><?php echo esc_html($reg->participation_type); ?></td>
                             <td><?php echo $reg->is_partner == 'tak' ? '<span class="dashicons dashicons-yes"></span>' : '<span class="dashicons dashicons-no-alt"></span>'; ?></td>
                             <td><?php echo esc_html($reg->registration_date); ?></td>
+                            <td>
+                                <form method="post" onsubmit="return confirm('Czy na pewno chcesz usunąć tę rejestrację?');">
+                                    <?php wp_nonce_field('mi_delete_registration_' . $reg->id); ?>
+                                    <input type="hidden" name="registration_id" value="<?php echo esc_attr($reg->id); ?>" />
+                                    <input type="hidden" name="mi_delete_registration" value="1" />
+                                    <?php submit_button(__('Usuń', 'mi-masterclass'), 'delete', '', false); ?>
+                                </form>
+                            </td>
                         </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="10">Brak rejestracji</td>
+                            <td colspan="11">Brak rejestracji</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
